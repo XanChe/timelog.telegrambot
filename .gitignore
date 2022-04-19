@@ -1,0 +1,10 @@
+**/.vs
+**/obj
+**/bin
+/deploy
+*.bat
+*.bak
+*.crt
+*.key
+*.pfx
+docker-compose.override.yml
