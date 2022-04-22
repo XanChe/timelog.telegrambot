@@ -13,9 +13,9 @@ namespace Timelog.Services
             _unitOfWork = unitOfWork;
         }
 
-        public void UseUserFilter(Guid userIdentityGuid)
+        public void UseUserFilter(string userIdentityId)
         {
-            _unitOfWork.UseUserFilter(userIdentityGuid);
+            _unitOfWork.UseUserFilter(userIdentityId);
         }
 
         public IStatisticsService CreateStatisticsService()

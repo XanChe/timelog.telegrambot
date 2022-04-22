@@ -10,7 +10,7 @@ namespace Timelog.Core
 {
     public interface ITimelogServiceBuilder
     {
-        public void UseUserFilter(Guid userIdentityGuid);
+        public void UseUserFilter(string userIdentityId);
         public IStatisticsService CreateStatisticsService();
         public IUserActivityService CreateUserActivityService();       
         public IEntityService<Project> CreateProjectService();     

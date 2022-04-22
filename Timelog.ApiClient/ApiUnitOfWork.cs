@@ -42,14 +42,14 @@ namespace Timelog.ApiClient
 
         public Task SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            return Task.Delay(0);
         }
 
-        public void UseUserFilter(Guid userIdentityGuid)
+        public void UseUserFilter(string userIdentityId)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Bearer",
-                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MzU0NzgzZS1lY2Y4LTRjNzgtYWQ3Zi04OTRjMTU2MGJjNDUiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoieGFuQHhhbi5ydSIsImp0aSI6IjJlYzY1MDdlLTcxNzctNDczNC04NzBjLTIyMDg3NDI3MWZhYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNDM1NDc4M2UtZWNmOC00Yzc4LWFkN2YtODk0YzE1NjBiYzQ1IiwiZXhwIjoxNjUzMTAzMTA3LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MDAwIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NTAwMCJ9.AwxdOkTZabWLPj-bNyPO4BMoQd-bCgYfA9fRe4b2_vU"
+                    userIdentityId
                     );
         }
     }

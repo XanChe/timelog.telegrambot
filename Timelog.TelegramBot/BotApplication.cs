@@ -13,11 +13,17 @@ namespace Timelog.TelegramBot
         private readonly ITelegramBotClient _telegramBot;
         private readonly IBotCommandService _botCommands;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserStorage _userStorage;
 
-        public BotApplication(TelegramBotSettings? botSettings, IBotCommandService botCommands, IUnitOfWork unitOfWork, ProjectsCommands projectsCommands)
+        public BotApplication(TelegramBotSettings? botSettings,
+            IBotCommandService botCommands, 
+            IUnitOfWork unitOfWork,
+            IUserStorage userStorage,
+            ProjectsCommands projectsCommands)
         {
             _botCommands = botCommands;
             _unitOfWork = unitOfWork;
+            _userStorage = userStorage;
             if (botSettings != null)
             {
                 _telegramBot = new TelegramBotClient(botSettings.Token ?? "");
@@ -58,7 +64,13 @@ namespace Timelog.TelegramBot
                 var message = update.Message;
                 if (message?.Text?[0] == '/')
                 {
-                    _unitOfWork.UseUserFilter(Guid.NewGuid());
+                    var userAuthString = _userStorage.GetTokenById(message.From.Id);
+
+                    if (userAuthString != null)
+                    {
+                        _unitOfWork.UseUserFilter(userAuthString);
+                    }
+                   
                     var commandRow = message.Text.Split(' ', 2);
                     await _botCommands.ExecuteCommandAsync(commandRow[0].ToLower(), botClient, update, commandRow[1]);
 
