@@ -1,12 +1,13 @@
-﻿using Telegram.Bot.Types;
+﻿using Telegram.Bot;
+using Telegram.Bot.Types;
 
 namespace Timelog.TelegramBot.Interfaces
 {
-    public interface IBotCommandService 
+    public delegate Task CommandHandler(ITelegramBotClient botClient, Update update, string parameters);
+    public interface IBotCommandService
     {
-        public void RegisterHandler(string botCommant, Action<Update> action);
+        public void RegisterHandler(string botCommant, CommandHandler command);
         public void UnregisterHandler(string botCommant);
-        public void UpdateHandler(string botCommant);
-        public void ExecuteCommand(string botCommant, Update update);
+        public Task ExecuteCommandAsync(string botCommant, ITelegramBotClient botClient, Update update, string parameters);
     }
 }

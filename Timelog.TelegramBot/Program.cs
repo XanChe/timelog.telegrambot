@@ -1,57 +1,51 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Extensions.Polling;
-using Telegram.Bot.Types;
-using Telegram.Bot.Exceptions;
+﻿using Microsoft.Extensions.Configuration;
+using Timelog.TelegramBot.Settings;
+using Microsoft.Extensions.DependencyInjection;
+using Timelog.TelegramBot.Interfaces;
+using Timelog.TelegramBot.Services;
+using Timelog.TelegramBot;
+using Timelog.Core;
+using Timelog.ApiClient;
+using Timelog.ApiClient.Settings;
+using Timelog.Services;
+using Timelog.TelegramBot.Commands;
 
 namespace TelegramBotExperiments
 {
-
     class Program
     {
-        static ITelegramBotClient bot = new TelegramBotClient("TOken");
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        {
-            // Некоторые действия
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
-            {
-                var message = update.Message;
-                if (message.Text.ToLower() == "/start")
-                {
-                    await botClient.SendTextMessageAsync(message.Chat, "Добро пожаловать на борт, добрый путник!");
-                    return;
-                }
-                await botClient.SendTextMessageAsync(message.Chat, "Привет-привет!!");
-            }
-        }
-
-        public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            // Некоторые действия
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
-        }
-
-
         static void Main(string[] args)
         {
-            Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
+            var devEnvironmentVariable = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
+            var isDevelopment = string.IsNullOrEmpty(devEnvironmentVariable) || devEnvironmentVariable.ToLower() == "development";
+            //Determines the working environment as IHostingEnvironment is unavailable in a console app
 
-            var cts = new CancellationTokenSource();
-            var cancellationToken = cts.Token;
-            var receiverOptions = new ReceiverOptions
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            if (isDevelopment) //only add secrets in development
             {
-                AllowedUpdates = { }, // receive all update types
-            };
-            bot.StartReceiving(
-                HandleUpdateAsync,
-                HandleErrorAsync,
-                receiverOptions,
-                cancellationToken
-            );
-            Console.ReadLine();
+                builder.AddUserSecrets<TelegramBotSettings>();
+            }
+            var configuration = builder.Build();
+
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection
+                .AddOptions()
+                .AddTransient<IConfiguration>(provider => configuration)
+                .AddTransient<TelegramBotSettings>(provider => configuration.GetSection(nameof(TelegramBotSettings)).Get<TelegramBotSettings>())
+                .AddTransient<ApiClientSettings>(provider => configuration.GetSection(nameof(ApiClientSettings)).Get<ApiClientSettings>())
+                .AddScoped<IUnitOfWork, ApiUnitOfWork>()
+                .AddScoped<ITimelogServiceBuilder, TimelogServiceBuilder>()
+                .AddSingleton<IBotCommandService, BotCommandService>()
+                .AddTransient<ProjectsCommands>()
+                .AddTransient<BotApplication>();
+            var services = serviceCollection.BuildServiceProvider();
+
+            var app = services.GetService<BotApplication>();
+            app?.Run();
         }
     }
 }
