@@ -4,9 +4,9 @@ using Timelog.TelegramBot.Interfaces;
 
 namespace Timelog.TelegramBot.Services
 {
-    public class BotCommandService : IBotCommandService
+    public class BotCommandsService : IBotCommandsService
     {
-        private Dictionary<string, CommandHandler> _commands = new Dictionary<string, CommandHandler>();
+        private Dictionary<string, CommandHandler> _commands = new Dictionary<string, CommandHandler>();        
         public async Task ExecuteCommandAsync(string botCommant, ITelegramBotClient botClient, Update update, string parameters)
         {
             if (_commands.ContainsKey(botCommant))

@@ -4,7 +4,7 @@ using Telegram.Bot.Types;
 namespace Timelog.TelegramBot.Interfaces
 {
     public delegate Task CommandHandler(ITelegramBotClient botClient, Update update, string parameters);
-    public interface IBotCommandService
+    public interface IBotCommandsService
     {
         public void RegisterHandler(string botCommant, CommandHandler command);
         public void UnregisterHandler(string botCommant);

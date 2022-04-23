@@ -11,15 +11,15 @@ namespace Timelog.TelegramBot
     public class BotApplication
     {
         private readonly ITelegramBotClient _telegramBot;
-        private readonly IBotCommandService _botCommands;
+        private readonly IBotCommandsService _botCommands;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserStorage _userStorage;
 
         public BotApplication(TelegramBotSettings? botSettings,
-            IBotCommandService botCommands, 
+            IBotCommandsService botCommands, 
             IUnitOfWork unitOfWork,
             IUserStorage userStorage,
-            ProjectsCommands projectsCommands)
+            CommandsCollector commandsCollector)
         {
             _botCommands = botCommands;
             _unitOfWork = unitOfWork;
@@ -64,15 +64,21 @@ namespace Timelog.TelegramBot
                 var message = update.Message;
                 if (message?.Text?[0] == '/')
                 {
+                    var commandRow = message.Text.Split(' ', 2);
                     var userAuthString = _userStorage.GetTokenById(message.From.Id);
 
-                    if (userAuthString != null)
+                    if (userAuthString != null || commandRow[0].ToLower() == "/singin")
                     {
                         _unitOfWork.UseUserFilter(userAuthString);
+                       
+                        await _botCommands.ExecuteCommandAsync(commandRow[0].ToLower(), botClient, update, commandRow[1]);
+                    }
+                    else
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat, "Пользователь не аторизирован!");
                     }
                    
-                    var commandRow = message.Text.Split(' ', 2);
-                    await _botCommands.ExecuteCommandAsync(commandRow[0].ToLower(), botClient, update, commandRow[1]);
+                   
 
                 }
 #nullable disable
@@ -81,7 +87,7 @@ namespace Timelog.TelegramBot
                     await botClient.SendTextMessageAsync(message.Chat, "Добро пожаловать на борт, добрый путник!");
                     return;
                 }
-                await botClient.SendTextMessageAsync(message.Chat, "Привет-привет!!");
+                //await botClient.SendTextMessageAsync(message.Chat, "Привет-привет!!");
 #nullable enable
             }
         }

@@ -8,7 +8,7 @@ namespace Timelog.Tests.TelegramBot
         [Fact]
         public void TestBotCommandServiceForExist()
         {
-            var commsndService = new BotCommandService();
+            var commsndService = new BotCommandsService();
             Assert.NotNull(commsndService);
         }
     }

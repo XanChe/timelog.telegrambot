@@ -15,12 +15,13 @@ namespace Timelog.TelegramBot.Commands
     public class ProjectsCommands
     {
         private readonly IEntityService<Project> _projectService;
-        public ProjectsCommands(IBotCommandService botCommands, ITimelogServiceBuilder serviceBuilder)
+        public ProjectsCommands(IBotCommandsService botCommands, ITimelogServiceBuilder serviceBuilder)
         {
             _projectService = serviceBuilder.CreateProjectService();
-            botCommands.RegisterHandler("/project", RepeatCommandAsync);
+            
         }
-        public async Task RepeatCommandAsync(ITelegramBotClient botClient, Update update, string parameters)
+        [CommandBind("/project")]
+        public async Task ProjectCommandAsync(ITelegramBotClient botClient, Update update, string parameters)
         {
 
             var project = await _projectService.GetByIdAsync(new Guid(parameters));
