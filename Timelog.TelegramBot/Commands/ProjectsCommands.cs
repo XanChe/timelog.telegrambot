@@ -1,21 +1,15 @@
-﻿using Newtonsoft.Json;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Timelog.Core;
 using Timelog.Core.Entities;
 using Timelog.Core.Services;
-using Timelog.TelegramBot.Interfaces;
 
 namespace Timelog.TelegramBot.Commands
 {
     public class ProjectsCommands
     {
         private readonly IEntityService<Project> _projectService;
-        public ProjectsCommands(IBotCommandsService botCommands, ITimelogServiceBuilder serviceBuilder)
+        public ProjectsCommands(ITimelogServiceBuilder serviceBuilder)
         {
             _projectService = serviceBuilder.CreateProjectService();
             

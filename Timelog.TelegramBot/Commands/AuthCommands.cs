@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Timelog.ApiClient.Settings;
 using Timelog.TelegramBot.Interfaces;
 
 namespace Timelog.TelegramBot.Commands
-{   
+{
     public class AuthCommands
     {
         private readonly IUserStorage _userStorage;
         private readonly HttpClient _httpClient;
-        public AuthCommands(IBotCommandsService botCommands, IUserStorage userStorage, ApiClientSettings apiSettings)
+        public AuthCommands(IUserStorage userStorage, ApiClientSettings apiSettings)
         {
             var handler = new HttpClientHandler();
             handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
@@ -26,8 +22,8 @@ namespace Timelog.TelegramBot.Commands
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _userStorage = userStorage;
-            botCommands.RegisterHandler("/singin", SingInCommandAsync);
         }
+        [CommandBind("/singin")]
         public async Task SingInCommandAsync(ITelegramBotClient botClient, Update update, string parameters)
         {
             var parametrsRow = parameters.Split();
@@ -35,13 +31,14 @@ namespace Timelog.TelegramBot.Commands
                     JsonSerializer.Serialize(new { email = parametrsRow[0], password = parametrsRow[1] }),
                     Encoding.UTF8, "application/json"));
             var content = await response.Content.ReadAsStringAsync();
+            var token = JsonSerializer.Deserialize<string>(content);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                _userStorage.SetTokenById(update.Message.From.Id, content);
+                _userStorage.SetTokenById(update.Message.From.Id, token);
             }
             var message = update.Message;
 #nullable disable          
-            await botClient.SendTextMessageAsync(message.Chat, $"Возвращаю: {content}");
+            await botClient.SendTextMessageAsync(message.Chat, $"Возвращаю: {token}");
 #nullable enable
         }
 
