@@ -42,12 +42,13 @@ namespace TelegramBotExperiments
                 .AddScoped<ITimelogServiceBuilder, TimelogServiceBuilder>()
                 .AddSingleton<IBotCommandsService, BotCommandsService>()
                 .AddSingleton<IUserStorage, SimpleUserStorage>()
-                .AddTransient<ProjectsCommands>()
-                .AddTransient<CommandsCollector>()                
+                .AddBotCommands()                                
                 .AddTransient<BotApplication>();
-            var services = serviceCollection.BuildServiceProvider();
+            var services = serviceCollection.BuildServiceProvider();          
+
 
             var app = services.GetService<BotApplication>();
+            
             app?.Run();
 
             

@@ -87,7 +87,7 @@ namespace Timelog.TelegramBot
                     await botClient.SendTextMessageAsync(message.Chat, "Добро пожаловать на борт, добрый путник!");
                     return;
                 }
-                //await botClient.SendTextMessageAsync(message.Chat, "Привет-привет!!");
+                
 #nullable enable
             }
         }
