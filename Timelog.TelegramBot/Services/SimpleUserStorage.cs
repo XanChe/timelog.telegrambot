@@ -1,10 +1,25 @@
-﻿using Timelog.TelegramBot.Interfaces;
+﻿using Newtonsoft.Json;
+using Timelog.TelegramBot.Interfaces;
 
 namespace Timelog.TelegramBot.Services
 {
     public class SimpleUserStorage : IUserStorage
     {
-        private Dictionary<long, string> _storage = new Dictionary<long, string>();
+        private Dictionary<long, string> _storage;
+        
+        public SimpleUserStorage()
+        {
+            try
+            {
+                string json = File.ReadAllText("userStorage.json");
+                _storage = JsonConvert.DeserializeObject<Dictionary<long, string>>(json) ?? new Dictionary<long, string>();
+            }
+            catch (Exception ex)
+            {
+                _storage = new Dictionary<long, string>();
+            }
+            
+        }
         public string? GetTokenById(long id)
         {
             if (_storage.ContainsKey(id))
@@ -14,6 +29,15 @@ namespace Timelog.TelegramBot.Services
             else
             {
                 return null;
+            }
+        }
+
+        public void RemoveTokenById(long id)
+        {
+            if (_storage.ContainsKey(id))
+            {
+                _storage.Remove(id);
+                Save();
             }
         }
 
@@ -27,6 +51,14 @@ namespace Timelog.TelegramBot.Services
             {
                 _storage.Add(id, token);
             }
+            Save();
         }
+
+        private void Save()
+        {
+            string json = JsonConvert.SerializeObject(_storage, Formatting.Indented);
+            File.WriteAllText("userStorage.json", json);
+        }
+
     }
 }

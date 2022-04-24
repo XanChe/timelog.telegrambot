@@ -17,13 +17,15 @@ namespace Timelog.TelegramBot.Commands
         [CommandBind("/project")]
         public async Task ProjectCommandAsync(ITelegramBotClient botClient, Update update, string parameters)
         {
+            if (parameters != "")
+            {
+                var project = await _projectService.GetByIdAsync(new Guid(parameters));
 
-            var project = await _projectService.GetByIdAsync(new Guid(parameters));
-           
-            var message = update.Message;
-#nullable disable          
-            await botClient.SendTextMessageAsync(message.Chat, $"Возвращаю: {Newtonsoft.Json.JsonConvert.SerializeObject(project)}");
+                var message = update.Message;
+#nullable disable
+                await botClient.SendTextMessageAsync(message.Chat, $"Возвращаю: {Newtonsoft.Json.JsonConvert.SerializeObject(project)}");
 #nullable enable
+            }
         }
 
     }

@@ -4,5 +4,6 @@
     {
         public string? GetTokenById(long id);
         public void SetTokenById(long id, string token);
+        public void RemoveTokenById(long id);
     }
 }

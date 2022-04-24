@@ -64,24 +64,27 @@ namespace Timelog.TelegramBot
                 var message = update.Message;
                 if (message?.Text?[0] == '/')
                 {
+                   
                     var commandRow = message.Text.Split(' ', 2);
+                    var commandRequest = new { Command = commandRow[0].ToLower(), Prameter = commandRow.Length > 1 ? commandRow[1] : "" };
                     var userAuthString = _userStorage.GetTokenById(message.From.Id);
 
                     if (userAuthString != null || commandRow[0].ToLower() == "/singin")
                     {
-                        _unitOfWork.UseUserFilter(userAuthString);
-                       
-                        await _botCommands.ExecuteCommandAsync(commandRow[0].ToLower(), botClient, update, commandRow[1]);
+                        _unitOfWork.UseUserFilter(userAuthString ?? "");
+
+                        await _botCommands.ExecuteCommandAsync(commandRequest.Command, botClient, update, commandRequest.Prameter);
                     }
                     else
                     {
+#nullable disable
                         await botClient.SendTextMessageAsync(message.Chat, "Пользователь не аторизирован!");
                     }
-                   
-                   
+
+
 
                 }
-#nullable disable
+
                 if (message?.Text?.ToLower() == "/start")
                 {
                     await botClient.SendTextMessageAsync(message.Chat, "Добро пожаловать на борт, добрый путник!");

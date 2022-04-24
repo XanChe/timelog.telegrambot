@@ -24,7 +24,7 @@ namespace Timelog.TelegramBot.Commands
             _userStorage = userStorage;
         }
         [CommandBind("/singin")]
-        public async Task SingInCommandAsync(ITelegramBotClient botClient, Update update, string parameters)
+        public async Task SingInAsync(ITelegramBotClient botClient, Update update, string parameters)
         {
             var parametrsRow = parameters.Split();
             var response = await _httpClient.PostAsync("Auth/SignIn", new StringContent(
@@ -32,13 +32,22 @@ namespace Timelog.TelegramBot.Commands
                     Encoding.UTF8, "application/json"));
             var content = await response.Content.ReadAsStringAsync();
             var token = JsonSerializer.Deserialize<string>(content);
+#nullable disable
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 _userStorage.SetTokenById(update.Message.From.Id, token);
             }
             var message = update.Message;
-#nullable disable          
-            await botClient.SendTextMessageAsync(message.Chat, $"Возвращаю: {token}");
+         
+            await botClient.SendTextMessageAsync(message.Chat, "Вы вошли!");
+#nullable enable
+        }
+        [CommandBind("/singout")]
+        public async Task SingOutAsync(ITelegramBotClient botClient, Update update, string parameters)
+        {
+#nullable disable
+            _userStorage.RemoveTokenById(update.Message.From.Id);
+            await botClient.SendTextMessageAsync(update.Message.Chat, "Вы вышли!");
 #nullable enable
         }
 

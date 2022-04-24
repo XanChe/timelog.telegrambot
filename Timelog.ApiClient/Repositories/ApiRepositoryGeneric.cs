@@ -58,8 +58,15 @@ namespace Timelog.ApiClient.Repositories
 
         public async Task<T?> ReadAsync(Guid id)
         {
-            string result = await _apiClient.GetStringAsync(_actionPrefix + '/' + id);
-            return JsonSerializer.Deserialize<T>(result, jsonOptions);
+            var response = await _apiClient.GetAsync(_actionPrefix + '/' + id);
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<T>(content, jsonOptions);
+            }
+
+            return null;         
+            
         }
 
         public Task<long> SaveChangesAsync()
