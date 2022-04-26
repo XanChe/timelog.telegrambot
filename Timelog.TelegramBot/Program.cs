@@ -41,6 +41,7 @@ namespace TelegramBotExperiments
                 .AddScoped<IUnitOfWork, ApiUnitOfWork>()
                 .AddScoped<ITimelogServiceBuilder, TimelogServiceBuilder>()
                 .AddSingleton<IBotCommandsService, BotCommandsService>()
+                .AddSingleton<IChatStateStorage, SimpleChatStateStorage>()
                 .AddSingleton<IUserStorage, SimpleUserStorage>()
                 .AddBotCommands()                                
                 .AddTransient<BotApplication>();

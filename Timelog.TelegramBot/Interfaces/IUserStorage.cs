@@ -2,8 +2,8 @@
 {
     public interface IUserStorage
     {
-        public string? GetTokenById(long id);
-        public void SetTokenById(long id, string token);
-        public void RemoveTokenById(long id);
+        public string? GetTokenByUserId(long id);
+        public void SetTokenByUserId(long id, string token);
+        public void RemoveTokenByUserId(long id);
     }
 }

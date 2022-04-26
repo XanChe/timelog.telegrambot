@@ -1,24 +1,30 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Timelog.TelegramBot.Interfaces;
+using Timelog.TelegramBot.Models;
 
 namespace Timelog.TelegramBot.Services
 {
     public class BotCommandsService : IBotCommandsService
     {
-        private Dictionary<string, CommandHandler> _commands = new Dictionary<string, CommandHandler>();        
-        public async Task ExecuteCommandAsync(string botCommant, ITelegramBotClient botClient, Update update, string parameters)
+        private Dictionary<string, Command> _commands = new Dictionary<string, Command>();
+
+        public Command? GetCommand(string botCommant)
         {
             if (_commands.ContainsKey(botCommant))
             {
-                await _commands[botCommant].Invoke(botClient, update, parameters);
+                return _commands[botCommant];
             }
-        }
-        public void RegisterHandler(string botCommant, CommandHandler command)
+            else
+            {
+                return null;
+            }
+        }      
+        public void RegisterCommand(string botCommant, Command command)
         {
             if (_commands.ContainsKey(botCommant))
             {
-                _commands[botCommant] += command;
+                _commands[botCommant] = command;
             }
             else
             {
@@ -26,7 +32,7 @@ namespace Timelog.TelegramBot.Services
             }
 
         }
-        public void UnregisterHandler(string botCommant)
+        public void UnregisterCommand(string botCommant)
         {
             if (_commands.ContainsKey(botCommant))
             {

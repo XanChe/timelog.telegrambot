@@ -20,7 +20,7 @@ namespace Timelog.TelegramBot.Services
             }
             
         }
-        public string? GetTokenById(long id)
+        public string? GetTokenByUserId(long id)
         {
             if (_storage.ContainsKey(id))
             {
@@ -32,7 +32,7 @@ namespace Timelog.TelegramBot.Services
             }
         }
 
-        public void RemoveTokenById(long id)
+        public void RemoveTokenByUserId(long id)
         {
             if (_storage.ContainsKey(id))
             {
@@ -41,7 +41,7 @@ namespace Timelog.TelegramBot.Services
             }
         }
 
-        public void SetTokenById(long id, string token)
+        public void SetTokenByUserId(long id, string token)
         {
             if (_storage.ContainsKey(id))
             {

@@ -35,7 +35,7 @@ namespace Timelog.TelegramBot.Commands
 #nullable disable
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                _userStorage.SetTokenById(update.Message.From.Id, token);
+                _userStorage.SetTokenByUserId(update.Message.From.Id, token);
             }
             var message = update.Message;
          
@@ -46,7 +46,7 @@ namespace Timelog.TelegramBot.Commands
         public async Task SingOutAsync(ITelegramBotClient botClient, Update update, string parameters)
         {
 #nullable disable
-            _userStorage.RemoveTokenById(update.Message.From.Id);
+            _userStorage.RemoveTokenByUserId(update.Message.From.Id);
             await botClient.SendTextMessageAsync(update.Message.Chat, "Вы вышли!");
 #nullable enable
         }

@@ -3,6 +3,7 @@ using Telegram.Bot.Types;
 using Timelog.Core;
 using Timelog.Core.Entities;
 using Timelog.Core.Services;
+using Timelog.TelegramBot.Requests;
 
 namespace Timelog.TelegramBot.Commands
 {
@@ -26,6 +27,22 @@ namespace Timelog.TelegramBot.Commands
                 await botClient.SendTextMessageAsync(message.Chat, $"Возвращаю: {Newtonsoft.Json.JsonConvert.SerializeObject(project)}");
 #nullable enable
             }
+        }
+        [CommandValidate("/project")]
+        public async Task<bool> ValidateProjectCommandAsync(CommandRequest commandRequest)
+        {
+            if (!commandRequest.IsUserSingIn)
+            {
+                commandRequest.ErrorMessage = "Пользователь не авторизован!";
+                return false;
+            }
+            if (!Guid.TryParse(commandRequest.ParametrString, out _))
+            {
+                commandRequest.ErrorMessage = "Неверный фомат параметра";
+                return false;
+            }
+            return true;
+           
         }
 
     }

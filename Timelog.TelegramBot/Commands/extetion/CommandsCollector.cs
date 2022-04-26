@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Timelog.TelegramBot.Interfaces;
+using Timelog.TelegramBot.Models;
 
 namespace Timelog.TelegramBot.Commands
 {
@@ -23,13 +24,28 @@ namespace Timelog.TelegramBot.Commands
                     foreach (MethodInfo method in t.GetMethods())
                     {
                         var bindAttribute = method.GetCustomAttribute<CommandBindAttribute>();
-                        if (bindAttribute != null)
+                        var validateAttribute = method.GetCustomAttribute<CommandValidateAttribute>();
+                        if (bindAttribute != null || validateAttribute != null)
                         {
                             //var atr = method.CustomAttributes.Where(atr => atr.AttributeType.Name == "CommandBindAttribute").SingleOrDefault();
-                            var commandToBind = bindAttribute?.Command ?? "";
+                            var commandToBind = bindAttribute?.Command ?? validateAttribute?.Command ?? "";
                             var commandService = services.GetService(t);
-                            commandsService.RegisterHandler(commandToBind, method.CreateDelegate<CommandHandler>(commandService));
-                        }
+                            var command = commandsService.GetCommand(commandToBind);
+                            if (command == null)
+                            {
+                                command = new Command(commandToBind);
+                            }
+                            if (bindAttribute != null)
+                            {
+                                command.SetCommandHandler(method.CreateDelegate<CommandHandler>(commandService));
+                            }
+                            else if (validateAttribute != null)
+                            {
+                                command.SetValidateHandler(method.CreateDelegate<ValidateHandler>(commandService));
+                            }
+                            commandsService.RegisterCommand(commandToBind, command);
+                        }                       
+                       
                     }
                 }
 

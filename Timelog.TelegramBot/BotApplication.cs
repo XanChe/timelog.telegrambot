@@ -4,6 +4,8 @@ using Telegram.Bot.Types;
 using Timelog.Core;
 using Timelog.TelegramBot.Commands;
 using Timelog.TelegramBot.Interfaces;
+using Timelog.TelegramBot.Models;
+using Timelog.TelegramBot.Requests;
 using Timelog.TelegramBot.Settings;
 
 namespace Timelog.TelegramBot
@@ -14,16 +16,19 @@ namespace Timelog.TelegramBot
         private readonly IBotCommandsService _botCommands;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserStorage _userStorage;
+        private readonly IChatStateStorage _chatStateStorage;
 
         public BotApplication(TelegramBotSettings? botSettings,
             IBotCommandsService botCommands, 
             IUnitOfWork unitOfWork,
             IUserStorage userStorage,
+            IChatStateStorage chatStateStorage,
             CommandsCollector commandsCollector)
         {
             _botCommands = botCommands;
             _unitOfWork = unitOfWork;
             _userStorage = userStorage;
+            _chatStateStorage = chatStateStorage;
             if (botSettings != null)
             {
                 _telegramBot = new TelegramBotClient(botSettings.Token ?? "");
@@ -57,49 +62,86 @@ namespace Timelog.TelegramBot
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            // Некоторые действия
+#nullable disable          
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
-                var message = update.Message;
-                if (message?.Text?[0] == '/')
+                var botRequest = new CommandRequest(update.Message);
+                
+                var lastChatState = _chatStateStorage.GetChatStateByChatId(botRequest.TelegramChatId);
+                
+                if (botRequest.IsCommand() || lastChatState != null)
                 {
-                   
-                    var commandRow = message.Text.Split(' ', 2);
-                    var commandRequest = new { Command = commandRow[0].ToLower(), Prameter = commandRow.Length > 1 ? commandRow[1] : "" };
-                    var userAuthString = _userStorage.GetTokenById(message.From.Id);
+                    botRequest.IsUserSingIn = ConfigureUnitOfWorkForUser(botRequest.TelegramUserId);
+                }
 
-                    if (userAuthString != null || commandRow[0].ToLower() == "/singin")
+                Command? command = null;
+
+                if (botRequest.IsCommand())
+                {        
+                    _chatStateStorage.SetChatStateByChatId(botRequest.TelegramChatId, new ChatStateModel() { ChatId = botRequest.TelegramChatId, CurrentCommand = botRequest.Command });
+
+                    command = _botCommands.GetCommand(botRequest.Command);
+                }
+                else if (lastChatState != null)
+                {                    
+                    command = _botCommands.GetCommand(lastChatState.CurrentCommand);
+                }
+
+                if (command != null)
+                {
+                    if (await command.Validation(botRequest))
                     {
-                        _unitOfWork.UseUserFilter(userAuthString ?? "");
-
-                        await _botCommands.ExecuteCommandAsync(commandRequest.Command, botClient, update, commandRequest.Prameter);
+                        await command.Execute(botClient, update, botRequest.ParametrString);
                     }
                     else
                     {
-#nullable disable
-                        await botClient.SendTextMessageAsync(message.Chat, "Пользователь не аторизирован!");
+                        await botClient.SendTextMessageAsync(botRequest.TelegramChatId, botRequest.ErrorMessage);
                     }
-
-
-
+                    //if (command.IsAuthorizationRequired())
+                    //{
+                    //    if (isUserSingIn)
+                    //    {
+                    //        await command.Execute(botClient, update, botRequest.ParametrString);
+                    //    }
+                    //    else
+                    //    {
+                    //        await botClient.SendTextMessageAsync(message.Chat, "Пользователь не аторизирован!");
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    await command.Execute(botClient, update, commandRequest.ParametrString);
+                    //}
                 }
-
-                if (message?.Text?.ToLower() == "/start")
+                if (botRequest.MessageText.ToLower() == "/start")
                 {
-                    await botClient.SendTextMessageAsync(message.Chat, "Добро пожаловать на борт, добрый путник!");
+                    await botClient.SendTextMessageAsync(botRequest.TelegramChatId, "Добро пожаловать на борт, добрый путник!");
                     return;
                 }
-                
-#nullable enable
             }
+#nullable enable
         }
+
+       
 
         private async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             // Некоторые действия
             await Task.Delay(0);
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
+        }
+
+        private bool ConfigureUnitOfWorkForUser(long userId)
+        {
+            var userAuthString = _userStorage.GetTokenByUserId(userId);
+
+            if (userAuthString != null)
+            {
+                _unitOfWork.UseUserFilter(userAuthString ?? "");
+                return true;
+            }
+            return false;
         }
 
     }
