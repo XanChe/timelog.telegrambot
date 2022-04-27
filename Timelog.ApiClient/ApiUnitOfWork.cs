@@ -11,12 +11,13 @@ namespace Timelog.ApiClient
     {
         private readonly HttpClient _httpClient;
         private readonly ApiRepositoryGeneric<Project> _projectRepository;
+        private readonly ApiRepositiryActivity _activityRepository;
 
         public IRepositoryGeneric<ActivityType> ActivityTypes => throw new NotImplementedException();
 
         public IRepositoryGeneric<Project> Projects => _projectRepository;
 
-        public IRepositoryActivity Activities => throw new NotImplementedException();
+        public IRepositoryActivity Activities => _activityRepository;
 
         public IRepositirySatistics Satistics => throw new NotImplementedException();
 
@@ -33,6 +34,7 @@ namespace Timelog.ApiClient
 
 
             _projectRepository = new ApiRepositoryGeneric<Project>(_httpClient, "Projects");
+            _activityRepository = new ApiRepositiryActivity(_httpClient, "Activities");
         }
 
         public void Dispose()

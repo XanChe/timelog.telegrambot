@@ -46,9 +46,16 @@ namespace Timelog.ApiClient.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var response = await _apiClient.GetAsync(_actionPrefix);
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<IEnumerable<T>>(content, jsonOptions);
+            }
+
+            return new List<T>();
         }
 
         public T? Read(Guid id)

@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 using Timelog.Core;
 using Timelog.TelegramBot.Commands;
 using Timelog.TelegramBot.Interfaces;
@@ -42,7 +43,8 @@ namespace Timelog.TelegramBot
 
         public void Run()
         {
-            Console.WriteLine("Запущен бот " + _telegramBot.GetMeAsync().Result.FirstName);
+            var telegramUser = _telegramBot.GetMeAsync().Result;
+            Console.WriteLine("Запущен бот " + telegramUser.FirstName);
 
             using var cts = new CancellationTokenSource();
             var cancellationToken = cts.Token;
@@ -97,23 +99,41 @@ namespace Timelog.TelegramBot
                     else
                     {
                         await botClient.SendTextMessageAsync(botRequest.TelegramChatId, botRequest.ErrorMessage);
-                    }
-                    //if (command.IsAuthorizationRequired())
-                    //{
-                    //    if (isUserSingIn)
-                    //    {
-                    //        await command.Execute(botClient, update, botRequest.ParametrString);
-                    //    }
-                    //    else
-                    //    {
-                    //        await botClient.SendTextMessageAsync(message.Chat, "Пользователь не аторизирован!");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    await command.Execute(botClient, update, commandRequest.ParametrString);
-                    //}
+                    }                   
                 }
+                if (botRequest.MessageText.ToLower() == "/test")
+                {
+                    InlineKeyboardMarkup inlineKeyboard = new(new[]
+                            {
+                                // first row
+                                new []
+                                {
+                                    InlineKeyboardButton.WithCallbackData(text: "1.1", callbackData: "11"),
+                                    InlineKeyboardButton.WithCallbackData(text: "1.2", callbackData: "12"),
+                                },
+                                // second row
+                                new []
+                                {
+                                    InlineKeyboardButton.WithCallbackData(text: "2.1", callbackData: "21"),
+                                    InlineKeyboardButton.WithCallbackData(text: "2.2", callbackData: "22"),
+                                },
+                            });
+
+                    Message sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: botRequest.TelegramChatId,
+                        text: "A message with an inline keyboard markup",
+                        replyMarkup: inlineKeyboard,
+                        cancellationToken: cancellationToken);
+                }
+                if (botRequest.MessageText.ToLower() == "/untest")
+                {
+                    Message sentMessage = await botClient.SendTextMessageAsync(
+                    chatId: botRequest.TelegramChatId,
+                    text: "Removing keyboard",
+                    replyMarkup: new ReplyKeyboardRemove(),
+                    cancellationToken: cancellationToken);
+                                }
+
                 if (botRequest.MessageText.ToLower() == "/start")
                 {
                     await botClient.SendTextMessageAsync(botRequest.TelegramChatId, "Добро пожаловать на борт, добрый путник!");

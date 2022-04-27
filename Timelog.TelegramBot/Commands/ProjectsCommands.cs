@@ -38,7 +38,7 @@ namespace Timelog.TelegramBot.Commands
             }
             if (!Guid.TryParse(commandRequest.ParametrString, out _))
             {
-                commandRequest.ErrorMessage = "Неверный фомат параметра";
+                commandRequest.ErrorMessage = "Неверный фомат параметра. Введите id проекта.";
                 return false;
             }
             return true;

@@ -32,7 +32,7 @@ namespace Timelog.TelegramBot.Models
             {
                 return await _validateHandler(commandRequest);
             }
-            return false;
+            return true;
         }
         public async Task Execute(ITelegramBotClient botClient, Update update, string parametr)
         {
