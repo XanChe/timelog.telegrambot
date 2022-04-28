@@ -4,8 +4,8 @@ using Timelog.TelegramBot.Requests;
 
 namespace Timelog.TelegramBot.Models
 {
-    public delegate Task CommandHandler(ITelegramBotClient botClient, Update update, string parameters);
-    public delegate Task<bool> ValidateHandler(CommandRequest commandRequest);
+    public delegate Task CommandHandler(ITelegramBotClient botClient, UpdateRequest updateRequest);
+    public delegate Task<bool> ValidateHandler(UpdateRequest updateRequest);
     public class Command
     {
         private  CommandHandler? _handler;
@@ -26,7 +26,7 @@ namespace Timelog.TelegramBot.Models
             _validateHandler = validateHandler;
         }
 
-        public async Task<bool> Validation(CommandRequest commandRequest)
+        public async Task<bool> Validation(UpdateRequest commandRequest)
         {
             if (_validateHandler != null)
             {
@@ -34,11 +34,11 @@ namespace Timelog.TelegramBot.Models
             }
             return true;
         }
-        public async Task Execute(ITelegramBotClient botClient, Update update, string parametr)
+        public async Task Execute(ITelegramBotClient botClient, UpdateRequest updateRequest)
         {
             if (_handler != null)
             {
-                await _handler(botClient, update, parametr);
+                await _handler(botClient, updateRequest);
             }
         }
         public bool IsAuthorizationRequired()

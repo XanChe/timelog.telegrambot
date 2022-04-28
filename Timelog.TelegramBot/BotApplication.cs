@@ -43,8 +43,8 @@ namespace Timelog.TelegramBot
 
         public void Run()
         {
-            var telegramUser = _telegramBot.GetMeAsync().Result;
-            Console.WriteLine("Запущен бот " + telegramUser.FirstName);
+            var telegramBotUser = _telegramBot.GetMeAsync().Result;
+            Console.WriteLine("Запущен бот " + telegramBotUser.FirstName);
 
             using var cts = new CancellationTokenSource();
             var cancellationToken = cts.Token;
@@ -66,24 +66,29 @@ namespace Timelog.TelegramBot
         {
 #nullable disable          
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
+            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
             {
-                var botRequest = new CommandRequest(update.Message);
+                var updateRequest = new UpdateRequest(update);
                 
-                var lastChatState = _chatStateStorage.GetChatStateByChatId(botRequest.TelegramChatId);
+                var lastChatState = _chatStateStorage.GetChatStateByChatId(updateRequest.TelegramChatId);
                 
-                if (botRequest.IsCommand() || lastChatState != null)
+                if (updateRequest.IsCommand() || lastChatState != null)
                 {
-                    botRequest.IsUserSingIn = ConfigureUnitOfWorkForUser(botRequest.TelegramUserId);
+                    updateRequest.IsUserSingIn = ConfigureUnitOfWorkForUser(updateRequest.TelegramUserId);
                 }
 
                 Command? command = null;
 
-                if (botRequest.IsCommand())
-                {        
-                    _chatStateStorage.SetChatStateByChatId(botRequest.TelegramChatId, new ChatStateModel() { ChatId = botRequest.TelegramChatId, CurrentCommand = botRequest.Command });
+                if (updateRequest.IsCommand())
+                {
+                    var newChatState = lastChatState ?? new ChatStateModel()
+                    {
+                        ChatId = updateRequest.TelegramChatId
+                    };
+                    newChatState.CurrentCommand = updateRequest.Command;
+                    _chatStateStorage.SetChatStateToChatId(updateRequest.TelegramChatId, newChatState);
 
-                    command = _botCommands.GetCommand(botRequest.Command);
+                    command = _botCommands.GetCommand(updateRequest.Command);
                 }
                 else if (lastChatState != null)
                 {                    
@@ -92,16 +97,16 @@ namespace Timelog.TelegramBot
 
                 if (command != null)
                 {
-                    if (await command.Validation(botRequest))
+                    if (await command.Validation(updateRequest))
                     {
-                        await command.Execute(botClient, update, botRequest.ParametrString);
+                        await command.Execute(botClient, updateRequest);
                     }
                     else
                     {
-                        await botClient.SendTextMessageAsync(botRequest.TelegramChatId, botRequest.ErrorMessage);
+                        await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, updateRequest.ErrorMessage);
                     }                   
                 }
-                if (botRequest.MessageText.ToLower() == "/test")
+                if (updateRequest.MessageText.ToLower() == "/test")
                 {
                     InlineKeyboardMarkup inlineKeyboard = new(new[]
                             {
@@ -120,23 +125,23 @@ namespace Timelog.TelegramBot
                             });
 
                     Message sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: botRequest.TelegramChatId,
+                        chatId: updateRequest.TelegramChatId,
                         text: "A message with an inline keyboard markup",
                         replyMarkup: inlineKeyboard,
                         cancellationToken: cancellationToken);
                 }
-                if (botRequest.MessageText.ToLower() == "/untest")
+                if (updateRequest.MessageText.ToLower() == "/untest")
                 {
                     Message sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: botRequest.TelegramChatId,
+                    chatId: updateRequest.TelegramChatId,
                     text: "Removing keyboard",
                     replyMarkup: new ReplyKeyboardRemove(),
                     cancellationToken: cancellationToken);
                                 }
 
-                if (botRequest.MessageText.ToLower() == "/start")
+                if (updateRequest.MessageText.ToLower() == "/start")
                 {
-                    await botClient.SendTextMessageAsync(botRequest.TelegramChatId, "Добро пожаловать на борт, добрый путник!");
+                    await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, "Добро пожаловать на борт, добрый путник!");
                     return;
                 }
             }

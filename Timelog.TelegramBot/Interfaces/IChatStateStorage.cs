@@ -10,6 +10,7 @@ namespace Timelog.TelegramBot.Interfaces
     public interface IChatStateStorage
     {
         public ChatStateModel? GetChatStateByChatId(long? chatId);
-        public void SetChatStateByChatId(long chatId, ChatStateModel chatState);
+        public void SetChatStateToChatId(long chatId, ChatStateModel chatState);
+        public void Save();
     }
 }

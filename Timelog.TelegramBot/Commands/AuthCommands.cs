@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Timelog.ApiClient.Settings;
 using Timelog.TelegramBot.Interfaces;
+using Timelog.TelegramBot.Requests;
 
 namespace Timelog.TelegramBot.Commands
 {
@@ -24,9 +25,9 @@ namespace Timelog.TelegramBot.Commands
             _userStorage = userStorage;
         }
         [CommandBind("/singin")]
-        public async Task SingInAsync(ITelegramBotClient botClient, Update update, string parameters)
+        public async Task SingInAsync(ITelegramBotClient botClient, UpdateRequest updateRequest)
         {
-            var parametrsRow = parameters.Split();
+            var parametrsRow = (updateRequest?.ParametrString ?? "").Split();
             var response = await _httpClient.PostAsync("Auth/SignIn", new StringContent(
                     JsonSerializer.Serialize(new { email = parametrsRow[0], password = parametrsRow[1] }),
                     Encoding.UTF8, "application/json"));
@@ -35,19 +36,18 @@ namespace Timelog.TelegramBot.Commands
 #nullable disable
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                _userStorage.SetTokenByUserId(update.Message.From.Id, token);
+                _userStorage.SetTokenByUserId(updateRequest.TelegramUserId, token);
             }
-            var message = update.Message;
          
-            await botClient.SendTextMessageAsync(message.Chat, "Вы вошли!");
+            await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, "Вы вошли!");
 #nullable enable
         }
         [CommandBind("/singout")]
-        public async Task SingOutAsync(ITelegramBotClient botClient, Update update, string parameters)
+        public async Task SingOutAsync(ITelegramBotClient botClient, UpdateRequest updateRequest)
         {
 #nullable disable
-            _userStorage.RemoveTokenByUserId(update.Message.From.Id);
-            await botClient.SendTextMessageAsync(update.Message.Chat, "Вы вышли!");
+            _userStorage.RemoveTokenByUserId(updateRequest.TelegramUserId);
+            await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, "Вы вышли!");
 #nullable enable
         }
 

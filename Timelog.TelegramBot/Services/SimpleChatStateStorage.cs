@@ -1,4 +1,5 @@
-﻿using Timelog.TelegramBot.Interfaces;
+﻿using Newtonsoft.Json;
+using Timelog.TelegramBot.Interfaces;
 using Timelog.TelegramBot.Models;
 
 namespace Timelog.TelegramBot.Services
@@ -7,6 +8,18 @@ namespace Timelog.TelegramBot.Services
     {
         private Dictionary<long, ChatStateModel> _storage = new Dictionary<long, ChatStateModel>();
 
+        public SimpleChatStateStorage()
+        {
+            try
+            {
+                string json = File.ReadAllText("scatStateStorage.json");
+                _storage = JsonConvert.DeserializeObject<Dictionary<long, ChatStateModel>>(json) ?? new Dictionary<long, ChatStateModel>();
+            }
+            catch (Exception ex)
+            {
+                _storage = new Dictionary<long, ChatStateModel>();
+            }
+        }
         public ChatStateModel? GetChatStateByChatId(long? chatId)
         {
             if (chatId == null)
@@ -23,7 +36,7 @@ namespace Timelog.TelegramBot.Services
             }
         }
 
-        public void SetChatStateByChatId(long chatId, ChatStateModel chatState)
+        public void SetChatStateToChatId(long chatId, ChatStateModel chatState)
         {
             if (_storage.ContainsKey(chatId))
             {
@@ -33,6 +46,12 @@ namespace Timelog.TelegramBot.Services
             {
                 _storage.Add(chatId, chatState);
             }
+        }
+
+        public void Save()
+        {
+            string json = JsonConvert.SerializeObject(_storage, Formatting.Indented);
+            File.WriteAllText("scatStateStorage.json", json);
         }
     }
 }

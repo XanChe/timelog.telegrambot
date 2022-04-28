@@ -16,20 +16,18 @@ namespace Timelog.TelegramBot.Commands
             
         }
         [CommandBind("/project")]
-        public async Task ProjectCommandAsync(ITelegramBotClient botClient, Update update, string parameters)
+        public async Task ProjectCommandAsync(ITelegramBotClient botClient, UpdateRequest updateRequest)
         {
-            if (parameters != "")
+            if (updateRequest.ParametrString != "")
             {
-                var project = await _projectService.GetByIdAsync(new Guid(parameters));
-
-                var message = update.Message;
+                var project = await _projectService.GetByIdAsync(new Guid(updateRequest.ParametrString));               
 #nullable disable
-                await botClient.SendTextMessageAsync(message.Chat, $"Возвращаю: {Newtonsoft.Json.JsonConvert.SerializeObject(project)}");
+                await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, $"Возвращаю: {Newtonsoft.Json.JsonConvert.SerializeObject(project)}");
 #nullable enable
             }
         }
         [CommandValidate("/project")]
-        public async Task<bool> ValidateProjectCommandAsync(CommandRequest commandRequest)
+        public async Task<bool> ValidateProjectCommandAsync(UpdateRequest commandRequest)
         {
             if (!commandRequest.IsUserSingIn)
             {
