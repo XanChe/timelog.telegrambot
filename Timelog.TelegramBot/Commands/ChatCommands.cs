@@ -4,6 +4,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Timelog.Core;
 using Timelog.Core.Entities;
 using Timelog.Core.Services;
+using Timelog.TelegramBot.Helpers;
 using Timelog.TelegramBot.Interfaces;
 using Timelog.TelegramBot.Models;
 using Timelog.TelegramBot.Requests;
@@ -14,10 +15,16 @@ namespace Timelog.TelegramBot.Commands
     {
         private readonly IEntityService<Project> _projectService;
         private readonly IChatStateStorage _chatStateStorage;
-        public ChatCommands(ITimelogServiceBuilder serviceBuilder, IChatStateStorage chatStateStorage)
+        private readonly DialogHelper _dialgHelper;
+        public ChatCommands(
+            ITimelogServiceBuilder serviceBuilder, 
+            IChatStateStorage chatStateStorage, 
+            DialogHelper dialogHelper
+            )
         {
             _projectService = serviceBuilder.CreateProjectService();
             _chatStateStorage = chatStateStorage;
+            _dialgHelper = dialogHelper;
         }
 
         [CommandBind("/bind_project")]
@@ -42,17 +49,19 @@ namespace Timelog.TelegramBot.Commands
             }
             else
             {
-                var availableProjects = await _projectService.GetAllAsync();
-                var buttons = availableProjects
-                    .Select(project => InlineKeyboardButton.WithCallbackData(text: project.Name, callbackData: $"/bind_project {project.Id}"))
-                    .ToArray();
-                
-                InlineKeyboardMarkup inlineKeyboard = new(buttons);
+                await _dialgHelper.SendSelectProjectDialogAsync(botClient, updateRequest, "Вибирите проект для привязки:");
 
-                var sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: updateRequest.TelegramChatId,
-                    text: "Вибирите проект для привязки:",
-                    replyMarkup: inlineKeyboard);
+                //var availableProjects = await _projectService.GetAllAsync();
+                //var buttons = availableProjects
+                //    .Select(project => InlineKeyboardButton.WithCallbackData(text: project.Name, callbackData: $"/bind_project {project.Id}"))
+                //    .ToArray();
+                
+                //InlineKeyboardMarkup inlineKeyboard = new(buttons);
+
+                //var sentMessage = await botClient.SendTextMessageAsync(
+                //    chatId: updateRequest.TelegramChatId,
+                //    text: "Вибирите проект для привязки:",
+                //    replyMarkup: inlineKeyboard);
             }
 
         }

@@ -10,6 +10,7 @@ using Timelog.ApiClient.Settings;
 using Timelog.Services;
 using Timelog.TelegramBot.Commands;
 using System.Reflection;
+using Timelog.TelegramBot.Helpers;
 
 namespace TelegramBotExperiments
 {
@@ -38,8 +39,9 @@ namespace TelegramBotExperiments
                 .AddTransient<IConfiguration>(provider => configuration)
                 .AddTransient<TelegramBotSettings>(provider => configuration.GetSection(nameof(TelegramBotSettings)).Get<TelegramBotSettings>())
                 .AddTransient<ApiClientSettings>(provider => configuration.GetSection(nameof(ApiClientSettings)).Get<ApiClientSettings>())
+                .AddTransient<DialogHelper>()
                 .AddScoped<IUnitOfWork, ApiUnitOfWork>()
-                .AddScoped<ITimelogServiceBuilder, TimelogServiceBuilder>()
+                .AddScoped<ITimelogServiceBuilder, ApiTimelogServiceBuilder>()
                 .AddSingleton<IBotCommandsService, BotCommandsService>()
                 .AddSingleton<IChatStateStorage, SimpleChatStateStorage>()
                 .AddSingleton<IUserStorage, SimpleUserStorage>()

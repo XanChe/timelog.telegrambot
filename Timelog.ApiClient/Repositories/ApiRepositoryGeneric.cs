@@ -11,9 +11,9 @@ namespace Timelog.ApiClient.Repositories
 {
     public class ApiRepositoryGeneric<T> : IRepositoryGeneric<T> where T : Entity
     {
-        private readonly HttpClient _apiClient;
-        private readonly string _actionPrefix;
-        private JsonSerializerOptions jsonOptions = new JsonSerializerOptions
+        protected readonly HttpClient _apiClient;
+        protected readonly string _actionPrefix;
+        protected JsonSerializerOptions jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
         };
@@ -25,25 +25,20 @@ namespace Timelog.ApiClient.Repositories
             _actionPrefix = actionPrefix;
         }
         public Guid UserGuid => userGuid;
-
-        public void Create(T item)
+        public async Task CreateAsync(T item)
         {
-            throw new NotImplementedException();
+            var response = await _apiClient.PostAsync(
+                _actionPrefix, 
+                new StringContent(
+                    JsonSerializer.Serialize(item),
+                    Encoding.UTF8, "application/json"
+                    )
+                );
         }
 
-        public Task CreateAsync(T item)
+        public async Task DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<T> GetAll()
-        {
-            throw new NotImplementedException();
+            var response = await _apiClient.DeleteAsync(_actionPrefix + '/' + id);
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -54,15 +49,8 @@ namespace Timelog.ApiClient.Repositories
                 var content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<IEnumerable<T>>(content, jsonOptions);
             }
-
             return new List<T>();
         }
-
-        public T? Read(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<T?> ReadAsync(Guid id)
         {
             var response = await _apiClient.GetAsync(_actionPrefix + '/' + id);
@@ -71,31 +59,26 @@ namespace Timelog.ApiClient.Repositories
                 var content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<T>(content, jsonOptions);
             }
-
-            return null;         
-            
+            return null;
         }
-
-        public Task<long> SaveChangesAsync()
+        public async Task<long> SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            return 0;
         }
-
         public void SetUser(Guid userIdentityGuid)
         {
             userGuid = userIdentityGuid;
         }
-
-        public void Update(T item)
+        public async Task UpdateAsync(T item)
         {
-            throw new NotImplementedException();
+            var response = await _apiClient.PostAsync(
+                 _actionPrefix,
+                 new StringContent(
+                     JsonSerializer.Serialize(item),
+                     Encoding.UTF8, "application/json"
+                     )
+                 );
         }
-
-        public Task UpdateAsync(T item)
-        {
-            throw new NotImplementedException();
-        }
-
         public void UseFilter(Func<T, bool> filter)
         {
             throw new NotImplementedException();

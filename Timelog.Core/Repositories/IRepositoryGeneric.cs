@@ -8,15 +8,11 @@ namespace Timelog.Core.Repositories
 
         public void SetUser(Guid userIdentityGuid);
         public Guid UserGuid { get; }
-        IEnumerable<T> GetAll();
         Task<IEnumerable<T>> GetAllAsync();
-        T? Read(Guid id);
         Task<T?> ReadAsync(Guid id);
-        void Create(T item);
         Task CreateAsync(T item);
-        void Update(T item);
         Task UpdateAsync(T item);
-        void Delete(Guid id);
+        Task DeleteAsync(Guid id);
         Task<long> SaveChangesAsync();
 
     }

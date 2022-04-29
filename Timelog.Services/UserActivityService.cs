@@ -9,7 +9,7 @@ namespace Timelog.Services
 {
     public class UserActivityService: EntityService<UserActivity>, IUserActivityService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        protected readonly IUnitOfWork _unitOfWork;
 
         public UserActivityService(IUnitOfWork unitOfWork) :base(unitOfWork.Activities)
         {
@@ -62,7 +62,7 @@ namespace Timelog.Services
                 await _unitOfWork.Activities.SaveChangesAsync();
             }
         }
-        public async Task<ActivityViewModel?> StartNewActivityAsync(Guid projectId, Guid activityTypeId)
+        public virtual async Task<ActivityViewModel?> StartNewActivityAsync(Guid projectId, Guid activityTypeId)
         {
             await StopPreviousActivityIfExistAsync();
             var newUserActivity = new UserActivity()

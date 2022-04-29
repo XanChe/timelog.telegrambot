@@ -3,8 +3,9 @@
 namespace Timelog.Core.Repositories
 {
     public interface IRepositoryActivity : IRepositoryGeneric<UserActivity>  
-    {
-        //public void SetFilterByUser(string userUniqId);
+    {        
         public Task<UserActivity?> getCurrentActivityAsync();
+        public Task StartActivityAsync(Guid projectId, Guid activityTypeId);
+        public Task StopActivityAsync(string comment);
     }
 }
