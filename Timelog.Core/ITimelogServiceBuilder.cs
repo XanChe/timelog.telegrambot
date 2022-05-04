@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Timelog.Core.Entities;
+﻿using Timelog.Core.Entities;
 using Timelog.Core.Services;
 
 namespace Timelog.Core
 {
+    /// <summary>
+    ///     Интерфейс "Строителя" сервисов Timelog уровня бизнес логики.
+    /// </summary>
     public interface ITimelogServiceBuilder
     {
         public void UseUserFilter(string userIdentityId);

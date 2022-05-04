@@ -9,6 +9,6 @@ namespace Timelog.Core.Services
         public Task<ActivityViewModel?> StartNewActivityAsync(Guid projectId, Guid activityTypeId);
         public Task<ActivityViewModel?> GetCurrentActivityIfExistAsync();
         public Task StopCurrentActivityIfExistAsync(string comment);
-        public Task<IEnumerable<ActivityViewModel?>> GetActivitiesAsync();
+        public Task<IEnumerable<ActivityViewModel>> GetActivitiesAsync();
     }
 }

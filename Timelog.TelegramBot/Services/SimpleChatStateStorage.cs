@@ -4,6 +4,9 @@ using Timelog.TelegramBot.Models;
 
 namespace Timelog.TelegramBot.Services
 {
+    /// <summary>
+    ///     Реализация IChatStateStorage с хранением состояния в json файле
+    /// </summary>
     public class SimpleChatStateStorage: IChatStateStorage
     {
         private Dictionary<long, ChatStateModel> _storage = new Dictionary<long, ChatStateModel>();
@@ -46,6 +49,7 @@ namespace Timelog.TelegramBot.Services
             {
                 _storage.Add(chatId, chatState);
             }
+            Save();
         }
 
         public void Save()

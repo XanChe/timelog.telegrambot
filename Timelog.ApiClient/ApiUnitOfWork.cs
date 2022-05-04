@@ -7,6 +7,9 @@ using Timelog.Core.Repositories;
 
 namespace Timelog.ApiClient
 {
+    /// <summary>
+    ///     Api реализация интерфейса IUnitOfWork
+    /// </summary>
     public class ApiUnitOfWork : IUnitOfWork
     {
         private readonly HttpClient _httpClient;

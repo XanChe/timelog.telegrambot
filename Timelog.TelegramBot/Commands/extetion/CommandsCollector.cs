@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using Timelog.TelegramBot.Interfaces;
 using Timelog.TelegramBot.Models;
 
@@ -16,7 +11,7 @@ namespace Timelog.TelegramBot.Commands
             Assembly? asm = Assembly.GetEntryAssembly();
            
             // получаем все типы из сборки MyApp.dll
-            Type[] types = asm.GetTypes();
+            Type[] types = asm?.GetTypes() ?? new Type[0];
             foreach (Type t in types)
             {                
                 if (t.Name.EndsWith("Commands"))

@@ -1,6 +1,4 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
-using Timelog.TelegramBot.Interfaces;
+﻿using Timelog.TelegramBot.Interfaces;
 using Timelog.TelegramBot.Models;
 
 namespace Timelog.TelegramBot.Services
@@ -19,7 +17,7 @@ namespace Timelog.TelegramBot.Services
             {
                 return null;
             }
-        }      
+        }
         public void RegisterCommand(string botCommant, Command command)
         {
             if (_commands.ContainsKey(botCommant))

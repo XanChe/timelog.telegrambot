@@ -27,14 +27,14 @@ namespace Timelog.Core.ViewModels
         public string ActivityTypeName { get; set; } = String.Empty;
         public Guid ActivityTypeId { get; set; }
 
-        public static implicit operator ActivityViewModel?(UserActivity? activity)
+        public static implicit operator ActivityViewModel(UserActivity activity)
         {
             return ActivityViewModel.MapFromUserActivity(activity); 
         }
-        public static ActivityViewModel? MapFromUserActivity(UserActivity? activity)
+        public static ActivityViewModel MapFromUserActivity(UserActivity activity)
         {
-            if (activity != null)
-            {
+            //if (activity != null)
+            //{
                 var endTime = activity.Status == ActivityStatus.Started ? DateTime.Now : activity.EndTime;
                 var duration = endTime - activity.StartTime;
                 return new ActivityViewModel()
@@ -54,8 +54,7 @@ namespace Timelog.Core.ViewModels
 #nullable enable
                     ActivityTypeName = activity?.ActivityType?.Name ?? ""
                 };
-            }
-            return null;
+            //}            
         }
 
         public UserActivity MapToUserActivity()

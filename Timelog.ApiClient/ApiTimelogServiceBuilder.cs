@@ -6,6 +6,9 @@ using Timelog.Services;
 
 namespace Timelog.ApiClient
 {
+    /// <summary>
+    ///      Api реализация интерфейса ITimelogServiceBuilder
+    /// </summary>
     public class ApiTimelogServiceBuilder: ITimelogServiceBuilder
     {
         private readonly IUnitOfWork _unitOfWork;

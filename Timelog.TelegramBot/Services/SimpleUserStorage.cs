@@ -3,6 +3,9 @@ using Timelog.TelegramBot.Interfaces;
 
 namespace Timelog.TelegramBot.Services
 {
+    /// <summary>
+    ///     Реализация IUserStorage с хранением состояния в json файле
+    /// </summary>
     public class SimpleUserStorage : IUserStorage
     {
         private Dictionary<long, string> _storage;

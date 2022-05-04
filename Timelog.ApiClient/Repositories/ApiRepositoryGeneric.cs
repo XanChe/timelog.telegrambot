@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Timelog.Core.Entities;
 using Timelog.Core.Repositories;
 
@@ -28,7 +24,7 @@ namespace Timelog.ApiClient.Repositories
         public async Task CreateAsync(T item)
         {
             var response = await _apiClient.PostAsync(
-                _actionPrefix, 
+                _actionPrefix,
                 new StringContent(
                     JsonSerializer.Serialize(item),
                     Encoding.UTF8, "application/json"
@@ -47,7 +43,11 @@ namespace Timelog.ApiClient.Repositories
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<IEnumerable<T>>(content, jsonOptions);
+                var responseItems = JsonSerializer.Deserialize<IEnumerable<T>>(content, jsonOptions);
+                if (responseItems != null)
+                {
+                    return responseItems;
+                }
             }
             return new List<T>();
         }
@@ -63,6 +63,7 @@ namespace Timelog.ApiClient.Repositories
         }
         public async Task<long> SaveChangesAsync()
         {
+            await Task.Delay(0);
             return 0;
         }
         public void SetUser(Guid userIdentityGuid)

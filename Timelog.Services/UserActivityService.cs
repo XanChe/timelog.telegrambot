@@ -78,9 +78,15 @@ namespace Timelog.Services
 
             return newUserActivity;
         }
+
         public async Task<ActivityViewModel?> GetCurrentActivityIfExistAsync()
         {
-            return await _unitOfWork.Activities.getCurrentActivityAsync();
+            var currentActivity = await _unitOfWork.Activities.getCurrentActivityAsync();            
+            if (currentActivity != null)
+            {
+                return (ActivityViewModel)currentActivity;
+            }
+            return null;
         }
 
         public async Task StopCurrentActivityIfExistAsync(string comment)
@@ -96,10 +102,9 @@ namespace Timelog.Services
             }
         }
 
-        public async Task<IEnumerable<ActivityViewModel?>> GetActivitiesAsync()
-        {
-            
-            return (await _unitOfWork.Activities.GetAllAsync()).Select(item => (ActivityViewModel?)item);
+        public async Task<IEnumerable<ActivityViewModel>> GetActivitiesAsync()
+        {            
+            return (await _unitOfWork.Activities.GetAllAsync()).Select(item => (ActivityViewModel)item);
         }
     }
 }

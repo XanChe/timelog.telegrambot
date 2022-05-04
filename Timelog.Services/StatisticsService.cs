@@ -16,7 +16,7 @@ namespace Timelog.Services
 
         public async Task<TotalStatisticsVewModel> GetTotalStatisticsAsync(DateTime from, DateTime to)
         {
-            return await _unitOfWork.Satistics.GetTotalStatisticsForPeriodAsync(from, to);
+            return await _unitOfWork.Satistics.GetTotalStatisticsForPeriodAsync(from, to) ?? new TotalStatisticsVewModel();
         }
 
         public async Task<IEnumerable<ProjectStatViewModel>> GetProjectStatisticsAsync( DateTime from, DateTime to)

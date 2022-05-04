@@ -1,5 +1,4 @@
 ﻿using Telegram.Bot;
-using Telegram.Bot.Types;
 using Timelog.TelegramBot.Requests;
 
 namespace Timelog.TelegramBot.Models
@@ -8,8 +7,8 @@ namespace Timelog.TelegramBot.Models
     public delegate Task<bool> ValidateHandler(UpdateRequest updateRequest);
     public class Command
     {
-        private  CommandHandler? _handler;
-        private ValidateHandler? _validateHandler;
+        public const string INVALID_COMMAND = "/invalid_command";
+
         public string Name { get; }
         public Command(string name)
         {
@@ -45,5 +44,8 @@ namespace Timelog.TelegramBot.Models
         {
             return true;
         }
+
+        private CommandHandler? _handler;
+        private ValidateHandler? _validateHandler;
     }
 }

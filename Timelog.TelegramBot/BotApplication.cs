@@ -11,6 +11,9 @@ using Timelog.TelegramBot.Settings;
 
 namespace Timelog.TelegramBot
 {
+    /// <summary>
+    ///     Основной класс бота. Тут всё начинается.
+    /// </summary>
     public class BotApplication
     {
         private readonly ITelegramBotClient _telegramBot;
@@ -40,7 +43,9 @@ namespace Timelog.TelegramBot
             }
             
         }
-
+        /// <summary>
+        ///     Точка входа в Timelog телаграмм бот.
+        /// </summary>
         public void Run()
         {
             var telegramBotUser = _telegramBot.GetMeAsync().Result;
@@ -53,8 +58,8 @@ namespace Timelog.TelegramBot
                 AllowedUpdates = { }, // receive all update types
             };
             _telegramBot.StartReceiving(
-                HandleUpdateAsync,
-                HandleErrorAsync,
+                HandleUpdateAsync, // оброботчик изменений чата
+                HandleErrorAsync, // оброботчик ошибок
                 receiverOptions,
                 cancellationToken
             );
@@ -64,7 +69,7 @@ namespace Timelog.TelegramBot
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-#nullable disable          
+#nullable enable          
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
             {

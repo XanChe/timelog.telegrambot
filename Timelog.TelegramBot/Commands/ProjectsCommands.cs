@@ -1,5 +1,4 @@
 ﻿using Telegram.Bot;
-using Telegram.Bot.Types;
 using Timelog.Core;
 using Timelog.Core.Entities;
 using Timelog.Core.Services;
@@ -13,14 +12,14 @@ namespace Timelog.TelegramBot.Commands
         public ProjectsCommands(ITimelogServiceBuilder serviceBuilder)
         {
             _projectService = serviceBuilder.CreateProjectService();
-            
+
         }
         [CommandBind("/project")]
         public async Task ProjectCommandAsync(ITelegramBotClient botClient, UpdateRequest updateRequest)
         {
-            if (updateRequest.ParametrString != "")
+            if (updateRequest.ParametrString != null && updateRequest.ParametrString != "")
             {
-                var project = await _projectService.GetByIdAsync(new Guid(updateRequest.ParametrString));               
+                var project = await _projectService.GetByIdAsync(new Guid(updateRequest.ParametrString));
 #nullable disable
                 await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, $"Возвращаю: {Newtonsoft.Json.JsonConvert.SerializeObject(project)}");
 #nullable enable
@@ -28,6 +27,10 @@ namespace Timelog.TelegramBot.Commands
         }
         [CommandValidate("/project")]
         public async Task<bool> ValidateProjectCommandAsync(UpdateRequest commandRequest)
+        {
+            return await Task.FromResult<bool>(ValidateProjectCommand(commandRequest));
+        }
+        private bool ValidateProjectCommand(UpdateRequest commandRequest)
         {
             if (!commandRequest.IsUserSingIn)
             {
@@ -40,7 +43,7 @@ namespace Timelog.TelegramBot.Commands
                 return false;
             }
             return true;
-           
+
         }
 
     }

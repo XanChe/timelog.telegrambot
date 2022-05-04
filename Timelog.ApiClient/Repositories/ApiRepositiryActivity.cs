@@ -7,7 +7,7 @@ namespace Timelog.ApiClient.Repositories
 {
     public class ApiRepositiryActivity : ApiRepositoryGeneric<UserActivity>, IRepositoryActivity
     {
-        public Guid UserGuid => throw new NotImplementedException();
+        public new Guid UserGuid => throw new NotImplementedException();
 
         public ApiRepositiryActivity(HttpClient client, string actionPrefix) : base(client, actionPrefix)
         {
@@ -41,7 +41,7 @@ namespace Timelog.ApiClient.Repositories
                 _actionPrefix + "/Stop"
                 ,
                 new StringContent(
-                    JsonSerializer.Serialize(new {comment = comment }),
+                    JsonSerializer.Serialize(new { comment = comment }),
                     Encoding.UTF8, "application/json"
                     )
                 );

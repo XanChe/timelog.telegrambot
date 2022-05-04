@@ -43,7 +43,7 @@ namespace Timelog.Services
         }
         public async Task DeleteAsync(Guid id)
         {
-            _repository.DeleteAsync(id);
+            await _repository.DeleteAsync(id);
             await _repository.SaveChangesAsync();
         }
     }

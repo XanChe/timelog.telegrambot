@@ -16,7 +16,7 @@ namespace Timelog.ApiClient.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<ActivityViewModel?>> GetActivitiesAsync()
+        public async Task<IEnumerable<ActivityViewModel>> GetActivitiesAsync()
         {
             var activities =  await _unitOfWork.Activities.GetAllAsync();
 
@@ -26,7 +26,12 @@ namespace Timelog.ApiClient.Services
 
         public async Task<ActivityViewModel?> GetCurrentActivityIfExistAsync()
         {
-            return await _unitOfWork.Activities.getCurrentActivityAsync();
+            var currentActivity = await _unitOfWork.Activities.getCurrentActivityAsync();
+            if (currentActivity != null)
+            {
+                return (ActivityViewModel)currentActivity;
+            }
+            return null;
         }
 
         public async Task<ActivityViewModel?> StartNewActivityAsync(Guid projectId, Guid activityTypeId)

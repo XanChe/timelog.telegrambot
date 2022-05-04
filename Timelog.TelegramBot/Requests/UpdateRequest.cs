@@ -2,6 +2,9 @@
 
 namespace Timelog.TelegramBot.Requests
 {
+    /// <summary>
+    ///     Собирательная структура данных, относящихся к конретному запросу на обновление телеграм бота.
+    /// </summary>
     public class UpdateRequest
     {
         public string MessageText { get; set; }
@@ -10,15 +13,15 @@ namespace Timelog.TelegramBot.Requests
         public List<string> Args { get; set; }
         public long TelegramChatId { get; }
         public long TelegramUserId { get; }
-        public string? ErrorMessage { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
         public bool IsUserSingIn { get; set; } = false;
-        private string? userAuthString;
+        //private string? userAuthString;
         
         public UpdateRequest(Update update)
         {
-            
 
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
+#nullable disable
+            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message )
             {
                 Message message = update.Message;
                 TelegramChatId = message.Chat.Id;
@@ -37,6 +40,7 @@ namespace Timelog.TelegramBot.Requests
             Command = Command.Split('@')[0];
             ParametrString = commandRow.Length > 1 ? commandRow[1] : "";
             Args = commandRow.Length > 1 ? ParametrString.Split().ToList() : new List<string>();
+#nullable enable
         }
         public bool IsCommand()
         {

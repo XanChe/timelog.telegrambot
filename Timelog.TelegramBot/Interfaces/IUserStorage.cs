@@ -1,5 +1,8 @@
 ﻿namespace Timelog.TelegramBot.Interfaces
 {
+    /// <summary>
+    ///     Интерфейс сервиса авторизации и индетификации пользователя
+    /// </summary>
     public interface IUserStorage
     {
         public string? GetTokenByUserId(long id);

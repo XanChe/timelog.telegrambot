@@ -3,6 +3,9 @@ using Timelog.Core.Repositories;
 
 namespace Timelog.Core
 {
+    /// <summary>
+    ///     Интерфейс сервиса работы с основными репозидотиями Timelog.
+    /// </summary>
     public interface IUnitOfWork : IDisposable
     {
         IRepositoryGeneric<ActivityType> ActivityTypes { get; }

@@ -15,11 +15,11 @@ namespace Timelog.TelegramBot.Commands
     {
         private readonly IEntityService<Project> _projectService;
         private readonly IChatStateStorage _chatStateStorage;
-        private readonly DialogHelper _dialgHelper;
+        private readonly BotDialogHelper _dialgHelper;
         public ChatCommands(
             ITimelogServiceBuilder serviceBuilder, 
             IChatStateStorage chatStateStorage, 
-            DialogHelper dialogHelper
+            BotDialogHelper dialogHelper
             )
         {
             _projectService = serviceBuilder.CreateProjectService();
@@ -38,8 +38,7 @@ namespace Timelog.TelegramBot.Commands
                 var project = await _projectService.GetByIdAsync(new Guid(currentChatState.ProjectId));
                 if (project != null)
                 {
-                    _chatStateStorage.SetChatStateToChatId(updateRequest.TelegramChatId, currentChatState);
-                    _chatStateStorage.Save();
+                    _chatStateStorage.SetChatStateToChatId(updateRequest.TelegramChatId, currentChatState);                    
                     await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, $"Проект <{project.Name}> привязан к текущему чату");
                 }
                 else
