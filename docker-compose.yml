@@ -1,0 +1,8 @@
+version: '3.9'
+
+services:
+  timelog.web:
+    image: ${DOCKER_REGISTRY-}timelog.telegram.bot
+    build:
+      context: .
+      dockerfile: Timelog.TelegramBot/Dockerfile   
