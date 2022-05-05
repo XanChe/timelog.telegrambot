@@ -20,6 +20,7 @@ namespace Timelog.TelegramBot.Services
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 _storage = new Dictionary<long, ChatStateModel>();
             }
         }

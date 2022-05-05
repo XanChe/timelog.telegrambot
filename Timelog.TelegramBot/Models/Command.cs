@@ -3,8 +3,19 @@ using Timelog.TelegramBot.Requests;
 
 namespace Timelog.TelegramBot.Models
 {
-    public delegate Task CommandHandler(ITelegramBotClient botClient, UpdateRequest updateRequest);
-    public delegate Task<bool> ValidateHandler(UpdateRequest updateRequest);
+    /// <summary>
+    /// Делегат обработчика выполнения команды телеграм бота
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="updateRequest">Запрос на изменение чата</param>
+    /// <returns></returns>
+    public delegate Task CommandExecuteHandler(ITelegramBotClient botClient, UpdateRequest updateRequest);
+    /// <summary>
+    /// Делегат обработчика валидации телеграм бота
+    /// </summary>
+    /// <param name="updateRequest">Запрос на изменение чата</param>
+    /// <returns>bool</returns>
+    public delegate Task<bool> CommandValidateHandler(UpdateRequest updateRequest);
     public class Command
     {
         public const string INVALID_COMMAND = "/invalid_command";
@@ -15,12 +26,12 @@ namespace Timelog.TelegramBot.Models
             Name = name;
         }
 
-        public void SetCommandHandler(CommandHandler? handler)
+        public void SetCommandHandler(CommandExecuteHandler? handler)
         {
             _handler = handler;
         }
 
-        public void SetValidateHandler(ValidateHandler validateHandler)
+        public void SetValidateHandler(CommandValidateHandler validateHandler)
         {
             _validateHandler = validateHandler;
         }
@@ -45,7 +56,7 @@ namespace Timelog.TelegramBot.Models
             return true;
         }
 
-        private CommandHandler? _handler;
-        private ValidateHandler? _validateHandler;
+        private CommandExecuteHandler? _handler;
+        private CommandValidateHandler? _validateHandler;
     }
 }

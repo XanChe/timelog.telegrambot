@@ -1,7 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 using Timelog.Core;
 using Timelog.TelegramBot.Commands;
 using Timelog.TelegramBot.Interfaces;
@@ -23,7 +22,7 @@ namespace Timelog.TelegramBot
         private readonly IChatStateStorage _chatStateStorage;
 
         public BotApplication(TelegramBotSettings? botSettings,
-            IBotCommandsService botCommands, 
+            IBotCommandsService botCommands,
             IUnitOfWork unitOfWork,
             IUserStorage userStorage,
             IChatStateStorage chatStateStorage,
@@ -41,7 +40,7 @@ namespace Timelog.TelegramBot
             {
                 throw new ArgumentNullException(nameof(botSettings));
             }
-            
+
         }
         /// <summary>
         ///     Точка входа в Timelog телаграмм бот.
@@ -69,36 +68,16 @@ namespace Timelog.TelegramBot
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-#nullable enable          
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
+
+            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message ||
+                update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
             {
                 var updateRequest = new UpdateRequest(update);
-                
-                var lastChatState = _chatStateStorage.GetChatStateByChatId(updateRequest.TelegramChatId);
-                
-                if (updateRequest.IsCommand() || lastChatState != null)
-                {
-                    updateRequest.IsUserSingIn = ConfigureUnitOfWorkForUser(updateRequest.TelegramUserId);
-                }
 
-                Command? command = null;
+                ConfigureUnitOfWorkForUser(updateRequest);
 
-                if (updateRequest.IsCommand())
-                {
-                    var newChatState = lastChatState ?? new ChatStateModel()
-                    {
-                        ChatId = updateRequest.TelegramChatId
-                    };
-                    newChatState.CurrentCommand = updateRequest.Command;
-                    _chatStateStorage.SetChatStateToChatId(updateRequest.TelegramChatId, newChatState);
-
-                    command = _botCommands.GetCommand(updateRequest.Command);
-                }
-                else if (lastChatState != null)
-                {                    
-                    command = _botCommands.GetCommand(lastChatState.CurrentCommand);
-                }
+                var command = ExtractCommandFromRequest(updateRequest);
 
                 if (command != null)
                 {
@@ -109,51 +88,36 @@ namespace Timelog.TelegramBot
                     else
                     {
                         await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, updateRequest.ErrorMessage);
-                    }                   
-                }
-                if (updateRequest.MessageText.ToLower() == "/test")
-                {
-                    InlineKeyboardMarkup inlineKeyboard = new(new[]
-                            {
-                                // first row
-                                new []
-                                {
-                                    InlineKeyboardButton.WithCallbackData(text: "1.1", callbackData: "11"),
-                                    InlineKeyboardButton.WithCallbackData(text: "1.2", callbackData: "12"),
-                                },
-                                // second row
-                                new []
-                                {
-                                    InlineKeyboardButton.WithCallbackData(text: "2.1", callbackData: "21"),
-                                    InlineKeyboardButton.WithCallbackData(text: "2.2", callbackData: "22"),
-                                },
-                            });
-
-                    Message sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: updateRequest.TelegramChatId,
-                        text: "A message with an inline keyboard markup",
-                        replyMarkup: inlineKeyboard,
-                        cancellationToken: cancellationToken);
-                }
-                if (updateRequest.MessageText.ToLower() == "/untest")
-                {
-                    Message sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: updateRequest.TelegramChatId,
-                    text: "Removing keyboard",
-                    replyMarkup: new ReplyKeyboardRemove(),
-                    cancellationToken: cancellationToken);
-                                }
-
-                if (updateRequest.MessageText.ToLower() == "/start")
-                {
-                    await botClient.SendTextMessageAsync(updateRequest.TelegramChatId, "Добро пожаловать на борт, добрый путник!");
-                    return;
+                    }
                 }
             }
-#nullable enable
         }
 
-       
+        private Command? ExtractCommandFromRequest(UpdateRequest updateRequest)
+        {
+            var lastChatState = _chatStateStorage.GetChatStateByChatId(updateRequest.TelegramChatId);
+
+            Command? command = null;
+
+            if (updateRequest.IsCommand())
+            {
+                var newChatState = lastChatState ?? new ChatStateModel()
+                {
+                    ChatId = updateRequest.TelegramChatId
+                };
+                newChatState.CurrentCommand = updateRequest.Command;
+                _chatStateStorage.SetChatStateToChatId(updateRequest.TelegramChatId, newChatState);
+
+                command = _botCommands.GetCommand(updateRequest.Command);
+            }
+            else if (lastChatState != null)
+            {
+                command = _botCommands.GetCommand(lastChatState.CurrentCommand);
+            }
+
+            return command;
+        }
+
 
         private async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
@@ -162,17 +126,20 @@ namespace Timelog.TelegramBot
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
         }
 
-        private bool ConfigureUnitOfWorkForUser(long userId)
+        private void ConfigureUnitOfWorkForUser(UpdateRequest updateRequest)
         {
-            var userAuthString = _userStorage.GetTokenByUserId(userId);
+            var userAuthString = _userStorage.GetTokenByUserId(updateRequest.TelegramUserId);
 
             if (userAuthString != null)
             {
                 _unitOfWork.UseUserFilter(userAuthString ?? "");
-                return true;
-            }
-            return false;
-        }
+                updateRequest.IsUserSingIn = true;
 
+            }
+            else
+            {
+                updateRequest.IsUserSingIn = false;
+            }
+        }
     }
 }

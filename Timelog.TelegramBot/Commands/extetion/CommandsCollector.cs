@@ -4,8 +4,11 @@ using Timelog.TelegramBot.Models;
 
 namespace Timelog.TelegramBot.Commands
 {
+    /// <summary>
+    /// Динамически собирает все обработчики и валидаторы команд в сервис работы с коммандами IBotCommandsService
+    /// </summary>
     public class CommandsCollector
-    {
+    {        
         public CommandsCollector(IBotCommandsService commandsService, IServiceProvider services)
         {
             Assembly? asm = Assembly.GetEntryAssembly();
@@ -32,11 +35,11 @@ namespace Timelog.TelegramBot.Commands
                             }
                             if (bindAttribute != null)
                             {
-                                command.SetCommandHandler(method.CreateDelegate<CommandHandler>(commandService));
+                                command.SetCommandHandler(method.CreateDelegate<CommandExecuteHandler>(commandService));
                             }
                             else if (validateAttribute != null)
                             {
-                                command.SetValidateHandler(method.CreateDelegate<ValidateHandler>(commandService));
+                                command.SetValidateHandler(method.CreateDelegate<CommandValidateHandler>(commandService));
                             }
                             commandsService.RegisterCommand(commandToBind, command);
                         }                       
